@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emoji Memory Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: white;
+            color: black;
+            transition: background 0.5s, color 0.5s;
+        }
+        h1 {
+            text-shadow: 0 0 10px #00ffff;
+        }
+        #game-board {
+            display: grid;
+            gap: 10px;
+            justify-content: center;
+            margin: 20px auto;
+        }
+        .card {
+            width: 80px;
+            height: 80px;
+            background: purple;
+            border-radius: 10px;
+            font-size: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s;
+            position: relative;
+            box-shadow: 0 0 10px black;
+            perspective: 1000px;
+        }
+        .card .inner {
+            transform-style: preserve-3d;
+            transition: transform 0.3s;
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            transform: rotateY(180deg); /* Hidden by default */
+        }
+        .card.flipped .inner {
+            transform: rotateY(0deg); /* Flip to show emoji */
+        }
+        .card .emoji, .card .hidden {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            backface-visibility: hidden;
+        }
+        .card .hidden {
+            background-color: yellow;
+            transform: rotateY(180deg);
+        }
+        .card.match {
+            background: #4CAF50;
+            color: white;
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.7);
+        }
+        .level-buttons {
+            margin: 20px;
+        }
+        .level-buttons button {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin: 5px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            transition: 0.3s;
+        }
+        .level-buttons button:hover {
+            background: #00ffff;
+            color: black;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>✨ Emoji Memory Game ✨</h1>
+
+    <div class="level-buttons">
+        <button onclick="startGame('easy')">Easy (2x2)</button>
+        <button onclick="startGame('medium')">Medium (4x4)</button>
+        <button onclick="startGame('hard')">Hard (6x6)</button>
+    </div>
+
+    <p>⏳ Time: <span id="timer">0</span> sec | 🔄 Moves: <span id="moves">0</span></p>
+
+    <div id="game-board"></div>
+
+    <script>
+        const emojiSets = {
+            easy: ["😀", "😂"],
+            medium: ["😀", "😂", "😍", "😎", "🤩", "😜", "😡", "👻"],
+            hard: ["😀", "😂", "😍", "😎", "🤩", "😜", "😡", "👻", "👽", "🤖", "🐱", "🐶", "🦄", "🐸", "🐵", "🦁", "🐯", "🐰"]
+        };
+        let firstCard = null, secondCard = null;
+        let lockBoard = false;
+        let moves = 0, timer = 0, timerInterval = null;
+
+        function shuffle(array) {
+            return array.sort(() => 0.5 - Math.random());
+        }
+
+        function startGame(level) {
+            const gameBoard = document.getElementById("game-board");
+            gameBoard.innerHTML = "";
+
+            let gridSize, emojis;
+            if (level === "easy") {
+                gridSize = 2;
+                emojis = emojiSets.easy;
+            } else if (level === "medium") {
+                gridSize = 4;
+                emojis = emojiSets.medium;
+            } else {
+                gridSize = 6;
+                emojis = emojiSets.hard;
+            }
+
+            gameBoard.style.gridTemplateColumns = `repeat(${gridSize}, 80px)`;
+
+            moves = 0;
+            timer = 0;
+            lockBoard = true;
+            clearInterval(timerInterval);
+            document.getElementById("timer").innerText = timer;
+            document.getElementById("moves").innerText = moves;
+
+            timerInterval = setInterval(() => {
+                timer++;
+                document.getElementById("timer").innerText = timer;
+            }, 1000);
+
+            const cards = shuffle([...emojis, ...emojis]);
+
+            cards.forEach((emoji) => {
+                const card = document.createElement("div");
+                card.classList.add("card");
+                card.dataset.emoji = emoji;
+
+                const inner = document.createElement("div");
+                inner.classList.add("inner");
+
+                const emojiFront = document.createElement("div");
+                emojiFront.classList.add("emoji");
+                emojiFront.innerHTML = emoji;
+
+                const emojiBack = document.createElement("div");
+                emojiBack.classList.add("hidden");
+                emojiBack.innerHTML = "❓";
+
+                inner.appendChild(emojiBack);
+                inner.appendChild(emojiFront);
+                card.appendChild(inner);
+                gameBoard.appendChild(card);
+            });
+
+            setTimeout(() => {
+                document.querySelectorAll(".card").forEach(card => {
+                    card.classList.add("flipped"); // Show all cards initially
+                });
+            }, 500);
+
+            setTimeout(() => {
+                document.querySelectorAll(".card").forEach(card => {
+                    card.classList.remove("flipped"); // Hide all cards after 3s
+                    card.addEventListener("click", flipCard);
+                });
+                lockBoard = false;
+            }, 3000);
+        }
+
+        function flipCard() {
+            if (lockBoard) return;
+            if (this === firstCard) return;
+
+            this.classList.add("flipped");
+
+            if (!firstCard) {
+                firstCard = this;
+            } else {
+                secondCard = this;
+                moves++;
+                document.getElementById("moves").innerText = moves;
+                checkForMatch();
+            }
+        }
+
+        function resetBoard() {
+            firstCard = null;
+            secondCard = null;
+            lockBoard = false;
+        }
+     
+        function checkForMatch() {
+            lockBoard = true;
+            
+            let isMatch = firstCard.dataset.emoji === secondCard.dataset.emoji;
+
+            if (isMatch) {
+                firstCard.classList.add("match");
+                secondCard.classList.add("match");
+                firstCard.removeEventListener("click", flipCard);
+                secondCard.removeEventListener("click", flipCard);
+                resetBoard();
+                checkWin();
+            } else {
+                setTimeout(() => {
+                    firstCard.classList.remove("flipped");
+                    secondCard.classList.remove("flipped");
+                    resetBoard();
+                }, 1000);
+            }
+        }
+
+        function checkWin() {
+            if (document.querySelectorAll(".card:not(.match)").length === 0) {
+                clearInterval(timerInterval);
+                setTimeout(() => {
+                    alert(`🎉 You won in ${timer} seconds with ${moves} moves!`);
+                    startGame('medium'); // Default restart medium level
+                }, 500);
+            }
+        }
+    </script>
+
+</body>
+</html>
