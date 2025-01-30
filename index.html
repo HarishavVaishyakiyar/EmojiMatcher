@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>✨ Emoji Memory Game</title>
+    <style>
+        /* Global Styles */
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+            background: linear-gradient(135deg, #ff00ff, #00ffff);
+            color: white;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: background 0.5s ease;
+        }
+        
+        /* Home Container */
+        .home-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 80vh;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.7);
+            transition: transform 0.3s ease;
+        }
+
+        .home-container:hover {
+            transform: scale(1.05);
+        }
+
+        /* Heading Styles */
+        h1 {
+            font-size: 48px;
+            text-shadow: 0 0 15px #00ffff, 0 0 30px #ff00ff, 0 0 45px #ff00ff;
+            animation: glow 1.5s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            0% {
+                text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff, 0 0 30px #ff00ff;
+            }
+            100% {
+                text-shadow: 0 0 20px #ff00ff, 0 0 30px #ff00ff, 0 0 50px #ff00ff;
+            }
+        }
+
+        /* Subheading Styles */
+        h2 {
+            font-size: 24px;
+            margin-top: 20px;
+            font-weight: lighter;
+            animation: fadeIn 2s ease-in-out;
+        }
+
+        /* Fade-in Animation */
+        @keyframes fadeIn {
+            0% {
+                opacity: 0;
+            }
+            100% {
+                opacity: 1;
+            }
+        }
+
+        /* Start Button */
+        .start-button {
+            padding: 20px 40px;
+            font-size: 20px;
+            background-color: #00ffff;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.3s ease;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.7);
+        }
+
+        .start-button:hover {
+            background-color: #ff00ff;
+            transform: scale(1.1);
+            box-shadow: 0 0 25px rgba(0, 255, 255, 0.8);
+        }
+
+        .start-button:active {
+            transform: scale(0.9);
+        }
+
+        /* Confetti Animation */
+        @keyframes confetti {
+            0% {
+                opacity: 1;
+                transform: translateY(0) rotate(0deg);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(100vh) rotate(720deg);
+            }
+        }
+
+        .confetti {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            animation: confetti 3s ease-in-out forwards;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="home-container">
+        <h1>✨ Emoji Memory Game ✨</h1>
+        <h2>Ready to test your memory?</h2>
+        <button class="start-button" onclick="startGamePage()">Start Game</button>
+    </div>
+
+    <script>
+        // Confetti effect on start button hover
+        document.querySelector('.start-button').addEventListener('mouseover', function() {
+            const confetti = document.createElement('div');
+            confetti.classList.add('confetti');
+            document.body.appendChild(confetti);
+        });
+
+        function startGamePage() {
+            window.location.href = "game.html"; // Make sure to point to your game page
+        }
+    </script>
+
+</body>
+</html>
